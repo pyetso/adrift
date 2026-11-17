@@ -2,15 +2,15 @@
 
 ## A visitor arrives
 
-`OceanScene.jsx` loads `lib/ocean.js` only on the client, because Three.js needs WebGL and the browser DOM. `initOcean()` creates a perspective camera, animated water geometry with GLSL shaders, a sky dome, lights, and glass-bottle meshes. Its camera starts at `(0,72,14)` and eases toward `(0,4.1,12.5)` over 5.5 seconds while rotating toward the horizon.
+`OceanScene.jsx` loads `lib/ocean.js` only on the client, because Three.js needs WebGL and the browser DOM. `initOcean()` creates a perspective camera, animated water geometry with GLSL shaders, a sky dome, lights, and glass-bottle meshes. Its camera starts at `(0,72,14)` and eases toward `(0,4.1,12.5)` over 6.2 seconds, following a slight arc while turning toward the horizon.
 
 ## A visitor writes
 
-`AdriftApp.jsx` contains the state for the letter: text, optional signature and editing mode. The letter uses a real HTML textarea, so typing, selection, pasting and keyboard accessibility still work. Pressing **Seal the letter** validates the text and starts a 2.25-second visual animation in `globals.css`. At this point the content is a draft only; it hasn't been sent to the server.
+`AdriftApp.jsx` contains the state for the letter: text, optional signature and editing mode. The letter uses a real HTML textarea, so typing, selection, pasting and keyboard accessibility still work. Pressing **Seal the letter** validates the text and starts a 1.85-second visual animation in `globals.css`. At this point the content is a draft only; it hasn't been sent to the server.
 
 ## A visitor places the bottle
 
-Once sealing is complete, `AdriftApp` tells `OceanScene` to enter carry mode. `lib/ocean.js` creates a temporary 3D bottle, follows pointer movement using a camera ray and plane intersection, and waits for a click/tap. On placement, the bottle falls to the animated water surface and calls the `onPlace()` callback with clamped world coordinates. The React app then uses either the localStorage demo store or an authenticated POST `/api/bottles` request to create the record. The released bottle becomes part of the shared/preview scene, and a ripple marks impact. If saving fails, the ghost bottle returns to carry mode rather than silently discarding the message.
+Once sealing is complete, `AdriftApp` tells `OceanScene` to enter carry mode. `lib/ocean.js` creates a temporary 3D bottle, follows pointer movement using a camera ray and plane intersection, and places it on release. On placement, the bottle falls to the animated water surface and calls the `onPlace()` callback with clamped world coordinates. The React app then uses either the localStorage demo store or an authenticated POST `/api/bottles` request to create the record. The released bottle becomes part of the shared/preview scene, and a ripple marks impact. If saving fails, the ghost bottle returns to carry mode rather than silently discarding the message.
 
 ## A visitor reads
 

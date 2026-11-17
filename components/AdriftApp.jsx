@@ -7,8 +7,8 @@ import {MAX_MESSAGE_LENGTH,validateBottle,validateEdit} from '../lib/validation.
 import {samples} from '../lib/samples';
 
 const cloud=isCloudConfigured();
-const SEAL_DURATION=2250;
-const CLOSE_DURATION=800;
+const SEAL_DURATION=1850;
+const CLOSE_DURATION=620;
 const dateLabel=value=>{
   const d=new Date(value);
   return Number.isNaN(d.getTime())?'Some time ago':d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
@@ -88,7 +88,7 @@ export default function AdriftApp(){
     };
     document.addEventListener('keydown',handleKey);
     const previous=document.body.style.overflow;document.body.style.overflow='hidden';
-    const id=setTimeout(()=>dialogRef.current?.querySelector('textarea,button')?.focus(),120);
+    const id=setTimeout(()=>dialogRef.current?.querySelector(modal==='write'?'textarea':'.paper-close')?.focus(),120);
     return()=>{document.removeEventListener('keydown',handleKey);document.body.style.overflow=previous;clearTimeout(id);};
   },[modal,sealing]);
   useEffect(()=>{
@@ -198,7 +198,7 @@ export default function AdriftApp(){
     {!carrying&&<button className="write-trigger" onClick={compose} type="button" aria-label="Write a letter" title="Write a letter">
       <PenAndPaper />
     </button>}
-    {carrying&&<div className="release-hint" role="status">Move your bottle with the cursor <span aria-hidden="true">·</span> Click the water to let it go <button disabled={busy} onClick={()=>{setCarrying(null);setDraft(null);}}>Cancel</button></div>}
+    {carrying&&<div className="release-hint" role="status">Drag the bottle to the water, then release to let it go.<button disabled={busy} onClick={()=>{setCarrying(null);setDraft(null);}}>Cancel</button></div>}
     {toast&&<div className="toast" role="status">{toast}</div>}
 
     {modal&&<div className={`modal-layer ${modal==='read'?'reader-layer':''} ${sealing?'sealing-layer':''}`} role="presentation" onMouseDown={e=>{
@@ -207,16 +207,16 @@ export default function AdriftApp(){
       <div className={`paper-dialog ${modal==='read'?'reader-dialog':''} ${modal==='mine'?'mine-dialog':''} ${sealing?'sealing-dialog':''} ${readPhase==='closing'?'reader-closing':''}`} ref={dialogRef} role="dialog" aria-modal="true" aria-label={modal==='write'?'Write a letter':modal==='read'?'Read a letter':'My letters'}>
         {!sealing&&<button className="paper-close" type="button" onClick={modal==='read'?closeRead:closePanel} aria-label="Close">×</button>}
         {modal==='write'&&<form className="writing-paper" onSubmit={submitLetter}>
-          <div className="paper-topline">A NOTE TO THE SEA <span>✷</span></div>
+          <div className="paper-topline">A note to the sea</div>
           <p className="handwritten greeting">Dear stranger,</p>
           <textarea autoFocus className="handwritten letter-writing" placeholder="I've been meaning to say..." aria-label="Write your message" maxLength={MAX_MESSAGE_LENGTH} value={message} onChange={e=>setMessage(e.target.value)} disabled={sealing||busy} />
           <div className="paper-signature"><span className="handwritten">Yours,</span><input className="handwritten" placeholder="a stranger" aria-label="Your name (optional)" value={author} onChange={e=>setAuthor(e.target.value)} maxLength={32} disabled={sealing||busy||Boolean(editing)}/></div>
           {error&&<p className="form-error" role="alert">{error}</p>}
           <div className="paper-bottomline"><button className="quiet-link" type="button" onClick={openMine} disabled={sealing}>My letters</button><span>{message.length}/{MAX_MESSAGE_LENGTH}</span></div>
-          <button className="cast-button" type="submit" disabled={busy||sealing}>{editing?'Save this letter':'Seal the letter'} <span aria-hidden="true">↗</span></button>
+          <button className="cast-button" type="submit" disabled={busy||sealing}>{editing?'Save this letter':'Seal the letter'}</button>
         </form>}
         {modal==='read'&&selected&&<article className="reading-paper">
-          <div className="paper-topline">A LETTER FROM SOMEWHERE <span>✷</span></div>
+          <div className="paper-topline">A letter from somewhere</div>
           <p className="handwritten greeting">To whoever finds this,</p>
           <blockquote className="handwritten found-message">{selected.message}</blockquote>
           <p className="handwritten found-signature">Yours,<br/>{selected.author_name||'A stranger'}</p>
@@ -224,7 +224,7 @@ export default function AdriftApp(){
           {error&&<p className="form-error" role="alert">{error}</p>}
         </article>}
         {modal==='mine'&&<section className="mine-content">
-          <div className="paper-topline">YOUR LETTERS <span>✷</span></div>
+          <div className="paper-topline">Your letters</div>
           <h2 className="handwritten greeting">Letters you've released</h2>
           {busy&&<p>Looking for your letters...</p>}
           {error&&<p className="form-error" role="alert">{error}</p>}
@@ -233,7 +233,7 @@ export default function AdriftApp(){
             <p className="handwritten">{b.message}</p>
             <div><span>{dateLabel(b.created_at)}</span><button onClick={()=>editLetter(b)}>Edit</button><button onClick={()=>removeLetter(b)} disabled={busy}>Remove</button></div>
           </article>)}</div>
-          <button className="cast-button" onClick={compose} type="button">Write another ↗</button>
+          <button className="cast-button" onClick={compose} type="button">Write another</button>
         </section>}
       </div>
       {sealing&&<div className="sealing-visual" aria-live="polite" aria-label="Rolling the paper and sealing it inside a bottle"><span className="rolling-sheet"/><AnimatedBottle/><span className="sealing-caption">Sealing your words…</span></div>}

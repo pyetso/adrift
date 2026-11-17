@@ -15,10 +15,10 @@ Open **http://localhost:3000**. The app uses a browser-local demo store until yo
 
 ## How the experience works
 
-1. On arrival, the Three.js camera begins high above the ocean and descends toward the waves over about 5.5 seconds. With reduced-motion enabled, the camera starts at water level.
+1. On arrival, the Three.js camera begins high above the ocean and descends in a gentle arc toward the horizon over about 6.2 seconds. With reduced-motion enabled, the camera starts at water level.
 2. Click the pen-and-paper illustration at the bottom-right. A textured letter opens. Its textarea uses a handwriting-style font.
 3. Click **Seal the letter**. The paper rolls into an animated bottle. The message is *not published yet*.
-4. A 3D bottle follows the pointer in front of the ocean. Move it to a spot and click or tap the water to release it. The bottle drops toward the wave surface, generates a ripple, and becomes a real drifting bottle.
+4. A 3D bottle follows the pointer in front of the ocean. Drag it to a spot and release to drop it into the water. The bottle falls toward the wave surface, generates a ripple, and becomes a real drifting bottle.
 5. To open an existing bottle, click it. The camera approaches, the bottle lifts, the cork rises, and the paper starts coming out. A paper sheet unrolls so you can read the message. Closing the sheet reverses the animation and returns the bottle to the ocean.
 6. Hit Escape while carrying a bottle or click **Cancel** to discard an unpublished letter. Your personal letters can be edited/deleted via **My letters** at the bottom of the writing sheet.
 
