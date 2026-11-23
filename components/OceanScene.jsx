@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 
-export default function OceanScene({bottles,onSelect,onPlace,carrying,focusedId}){
+export default function OceanScene({bottles,onSelect,onPlace,carrying,focusedId,onLoadComplete}){
   const hostRef=useRef(null);
   const instance=useRef(null);
   const onSelectRef=useRef(onSelect);
@@ -45,7 +45,8 @@ export default function OceanScene({bottles,onSelect,onPlace,carrying,focusedId}
       instance.current=ocean;
       ocean.setBottles(bottlesRef.current);
       setStatus('ready');
-    }).catch(err=>{if(!cancelled){console.error('3D ocean unavailable',err);setStatus('unavailable');}});
+      onLoadComplete();
+    }).catch(err=>{if(!cancelled){console.error('3D ocean unavailable',err);setStatus('unavailable');onLoadComplete();}});
     return()=>{cancelled=true;instance.current?.destroy();instance.current=null;};
   },[]);
   useEffect(()=>{instance.current?.setBottles(bottles);},[bottles]);
@@ -62,8 +63,8 @@ export default function OceanScene({bottles,onSelect,onPlace,carrying,focusedId}
         {movementButton('backward','Move backward')}
       </div>
     </>}
-    {status!=='ready'&&<div className={`ocean-fallback ${carrying?'fallback-carrying':''}`} role="img" aria-label="An ocean at sunset" onClick={async()=>{if(carrying&&status==='unavailable')await onPlaceRef.current({x:0,z:-8});}}><div className="fallback-haze"/><span className="fallback-sun"/><span className="fallback-water"/>
+    <div className={`ocean-fallback ${status==='loading'?'fallback-loading':''} ${status==='ready'?'fallback-finished':''} ${carrying?'fallback-carrying':''}`} role={status==='loading'?'status':undefined} aria-label={status==='loading'?'Loading ocean':undefined} aria-hidden={status==='ready'} onClick={async()=>{if(carrying&&status==='unavailable')await onPlaceRef.current({x:0,z:-8});}}>
       {status==='unavailable'&&<div className="fallback-error">3D graphics aren't available in this browser. Try Chrome or Edge with hardware acceleration enabled.</div>}
-    </div>}
+    </div>
   </>;
 }

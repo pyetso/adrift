@@ -73,6 +73,7 @@ export default function AdriftApp(){
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
   const [toast,setToast]=useState('');
+  const [sceneLoaded,setSceneLoaded]=useState(false);
   const dialogRef=useRef(null);
   const timers=useRef([]);
   const isPlacing=useRef(false);
@@ -205,11 +206,11 @@ export default function AdriftApp(){
     }catch(e){setError(e.message);}finally{setBusy(false);}
   }
   return <main className={`site-shell ${carrying?'is-carrying':''}`}>
-    <OceanScene bottles={shown} onSelect={beginRead} onPlace={placeBottle}
+    <OceanScene bottles={shown} onSelect={beginRead} onPlace={placeBottle} onLoadComplete={()=>setSceneLoaded(true)}
       carrying={carrying} focusedId={modal==='read'&&readPhase!=='closing'?selected?.id:null} />
     <div className="screen-vignette" aria-hidden="true" />
 
-    {!carrying&&<>
+    {sceneLoaded&&!carrying&&<>
       <button className="bottle-trigger" onClick={openMine} type="button" aria-label="Open your letters">
         <BottleMark />
       </button>
