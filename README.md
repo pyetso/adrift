@@ -16,7 +16,7 @@ Open **http://localhost:3000**. The app uses a browser-local demo store until yo
 ## How the experience works
 
 1. On arrival, the Three.js camera begins high above the ocean and descends in a gentle arc toward the horizon over about 6.2 seconds. With reduced-motion enabled, the camera starts at water level.
-   The scene asks once for your location to calculate the sun's position entirely in your browser. Coordinates are not sent or saved. If location is unavailable or denied, the ocean uses an explicitly approximate day cycle based on your device's local clock.
+   The scene asks once for your location to calculate the sun's position in the browser. With permission, rounded coordinates are also sent to the app's weather endpoint, which requests Open-Meteo conditions. Coordinates are not stored with letters. Without permission, the weather endpoint uses a fixed offshore sample and daylight uses the device's local clock.
    Drag to look, use **WASD** to move across the ocean, and use the arrow keys to adjust your view. Touch screens have a four-way movement pad and swipe-to-look controls.
 2. Click the pen-and-paper illustration at the bottom-right. A textured letter opens. Its textarea uses a handwriting-style font.
 3. Click **Seal the letter**. The paper rolls into an animated bottle. The message is *not published yet*.
@@ -40,6 +40,12 @@ The water uses a 104-segment mobile / 120-segment desktop triangular grid with f
 - `lib/validation.mjs` — input validation and safe release coordinates
 - `lib/demo-store.js` — localStorage demo persistence
 - `database/schema.sql` — Supabase database schema + access controls
+
+## Weather and ocean conditions
+
+`GET /api/environment` combines Open-Meteo weather and marine feeds. Weather cloud cover changes cloud opacity, wind changes cloud motion, and offshore wave height changes the visible wave amplitude. The marine sample is fixed at 40 N, 50 W so inland visitors can still see offshore conditions. Updates are requested approximately every twenty minutes. Forecast errors use safe fallback values. These are aesthetic mappings, not a physics simulation. Wave and wind direction, wave period, and the optional drift-speed mapping are normalized for future refinements; the current scene does not dynamically change long-term bottle paths.
+
+See https://open-meteo.com/en/docs and https://open-meteo.com/en/docs/marine-weather-api. Forecast integration has passing logic tests, but still needs real service responses and visual browser validation before deployment.
 
 ## Make it public
 
