@@ -8,7 +8,7 @@ import {samples} from '../lib/samples';
 
 const cloud=isCloudConfigured();
 const SEAL_DURATION=1850;
-const CLOSE_DURATION=620;
+const CLOSE_DURATION=400;
 const dateLabel=value=>{
   const d=new Date(value);
   return Number.isNaN(d.getTime())?'Some time ago':d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
@@ -21,14 +21,31 @@ async function request(path,options={}){
   return body;
 }
 function PenAndPaper(){
-  return <svg viewBox="0 0 108 105" fill="none" aria-hidden="true" className="pen-illustration">
-    <path d="M19 19 70 12 81 74 29 84Z" fill="#E9D4AA" stroke="#87694C" strokeWidth="2.5"/>
-    <path d="M14 15 65 9 76 71 24 81Z" fill="#FFF7E4" stroke="#AC9777" strokeWidth="2"/>
-    <path d="m25 34 34-4M27 44l34-4M29 54l26-3" stroke="#BEA889" strokeWidth="2" strokeLinecap="round"/>
-    <path d="m50 83 38-53 7 5-37 54-12 7Z" fill="#4C3F32" stroke="#271F1B" strokeWidth="2"/>
-    <path d="m88 30 5-8c2-3 7 0 5 3l-5 10" fill="#C6A56D"/>
-    <path d="m50 83-4 13 12-7" fill="#D8B47B" stroke="#271F1B" strokeWidth="1.7"/>
-    <path d="m46 96 3-9 5 4" fill="#201B16"/>
+  return <svg viewBox="0 0 80 80" fill="none" aria-hidden="true" className="action-illustration">
+    <path d="M18 10h30l14 14v46H18z" fill="#F2E6CA" stroke="#806D55" strokeWidth="2"/>
+    <path d="M48 10v14h14M27 37h24M27 45h17" stroke="#A18B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="m42 58 16-20 6 5-16 20-9 4z" fill="#514437" stroke="#30291F" strokeWidth="1.6" strokeLinejoin="round"/>
+    <path d="m42 58-3 9 9-4" fill="#D0B78E"/>
+  </svg>;
+}
+function BottleMark(){
+  return <svg viewBox="0 0 80 80" fill="none" aria-hidden="true" className="action-illustration">
+    <path d="M31 9h18v13l7 8v33l-5 8H29l-5-8V30l7-8z" fill="#B8D5C7" fillOpacity=".82" stroke="#F2E6CA" strokeWidth="2" strokeLinejoin="round"/>
+    <path d="M31 9h18v8H31z" fill="#C5A276" stroke="#806D55" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path d="m28 35 24-3v25l-24 2z" fill="#F2E6CA" fillOpacity=".9"/>
+    <path d="m33 42 13-1M33 49l11-1" stroke="#A18B6B" strokeWidth="1.7" strokeLinecap="round"/>
+    <path d="m31 24 7 2v42h-8l-5-7V30z" fill="#FFF6E2" fillOpacity=".18"/>
+  </svg>;
+}
+function EditLetterIcon(){
+  return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4 16.8V20h3.2L19 8.2 15.8 5 4 16.8Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+    <path d="m13.9 6.9 3.2 3.2M4 12V4h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>;
+}
+function DeleteLetterIcon(){
+  return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4.5 7h15M9 7V4.5h6V7m-9 1 1 11h10l1-11M10 10.5v5.5m4-5.5v5.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>;
 }
 function AnimatedBottle(){
@@ -81,14 +98,22 @@ export default function AdriftApp(){
       }
       if(e.key==='Tab'&&dialogRef.current){
         const els=[...dialogRef.current.querySelectorAll('button:not([disabled]),textarea:not([disabled]),input:not([disabled])')];
-        if(!els.length)return;
-        if(e.shiftKey&&document.activeElement===els[0]){e.preventDefault();els[els.length-1].focus();}
-        else if(!e.shiftKey&&document.activeElement===els[els.length-1]){e.preventDefault();els[0].focus();}
+        if(!els.length){e.preventDefault();dialogRef.current.focus();return;}
+        if(e.shiftKey&&(document.activeElement===els[0]||document.activeElement===dialogRef.current)){
+          e.preventDefault();els[els.length-1].focus();
+        }else if(!e.shiftKey&&(document.activeElement===els[els.length-1]||document.activeElement===dialogRef.current)){
+          e.preventDefault();els[0].focus();
+        }
       }
     };
     document.addEventListener('keydown',handleKey);
     const previous=document.body.style.overflow;document.body.style.overflow='hidden';
-    const id=setTimeout(()=>dialogRef.current?.querySelector(modal==='write'?'textarea':'.paper-close')?.focus(),120);
+    const id=setTimeout(()=>{
+      const target=modal==='write'
+        ?dialogRef.current?.querySelector('textarea')
+        :dialogRef.current?.querySelector('button:not([disabled]),textarea:not([disabled]),input:not([disabled])')||dialogRef.current;
+      target?.focus();
+    },120);
     return()=>{document.removeEventListener('keydown',handleKey);document.body.style.overflow=previous;clearTimeout(id);};
   },[modal,sealing]);
   useEffect(()=>{
@@ -166,7 +191,7 @@ export default function AdriftApp(){
     finally{isPlacing.current=false;setBusy(false);}
   }
   async function removeLetter(b){
-    if(!window.confirm('Remove this letter from the ocean?'))return;
+    if(!window.confirm('Delete this letter from the ocean?'))return;
     setBusy(true);
     try{
       if(!cloud){deleteDemoLetter(b.id);setOwn(getDemoLetters());setLetters(getDemoLetters());}
@@ -176,64 +201,58 @@ export default function AdriftApp(){
         setOwn(previous=>previous.filter(x=>x.id!==b.id));
         setLetters(previous=>previous.filter(x=>x.id!==b.id));
       }
-      notify('Letter removed.');
+      notify('Letter deleted.');
     }catch(e){setError(e.message);}finally{setBusy(false);}
   }
-  async function reportLetter(){
-    if(!selected||selected.id.startsWith('sample-')||!cloud)return;
-    if(!window.confirm('Report this letter for review?'))return;
-    setBusy(true);
-    try{
-      const token=await getAccessToken();
-      await request(`/api/bottles/${selected.id}/report`,{method:'POST',headers:{Authorization:`Bearer ${token}`}});
-      closeRead();notify('Report received.');
-    }catch(e){setError(e.message);}finally{setBusy(false);}
-  }
-
   return <main className={`site-shell ${carrying?'is-carrying':''}`}>
     <OceanScene bottles={shown} onSelect={beginRead} onPlace={placeBottle}
       carrying={carrying} focusedId={modal==='read'&&readPhase!=='closing'?selected?.id:null} />
     <div className="screen-vignette" aria-hidden="true" />
 
-    {!carrying&&<button className="write-trigger" onClick={compose} type="button" aria-label="Write a letter" title="Write a letter">
-      <PenAndPaper />
-    </button>}
+    {!carrying&&<>
+      <button className="bottle-trigger" onClick={openMine} type="button" aria-label="Open your letters">
+        <BottleMark />
+      </button>
+      <button className="write-trigger" onClick={compose} type="button" aria-label="Write a letter" title="Write a letter">
+        <PenAndPaper />
+      </button>
+    </>}
     {carrying&&<div className="release-hint" role="status">Drag the bottle to the water, then release to let it go.<button disabled={busy} onClick={()=>{setCarrying(null);setDraft(null);}}>Cancel</button></div>}
     {toast&&<div className="toast" role="status">{toast}</div>}
 
-    {modal&&<div className={`modal-layer ${modal==='read'?'reader-layer':''} ${sealing?'sealing-layer':''}`} role="presentation" onMouseDown={e=>{
+    {modal&&<div className={`modal-layer ${modal==='read'?'reader-layer':''} ${sealing?'sealing-layer':''}`} role="presentation" onPointerDown={e=>{
       if(e.currentTarget===e.target&&!sealing){if(modal==='read')closeRead();else closePanel();}
     }}>
-      <div className={`paper-dialog ${modal==='read'?'reader-dialog':''} ${modal==='mine'?'mine-dialog':''} ${sealing?'sealing-dialog':''} ${readPhase==='closing'?'reader-closing':''}`} ref={dialogRef} role="dialog" aria-modal="true" aria-label={modal==='write'?'Write a letter':modal==='read'?'Read a letter':'My letters'}>
-        {!sealing&&<button className="paper-close" type="button" onClick={modal==='read'?closeRead:closePanel} aria-label="Close">×</button>}
+      <div className={`paper-dialog ${modal==='read'?'reader-dialog':''} ${modal==='mine'?'mine-dialog':''} ${sealing?'sealing-dialog':''} ${readPhase==='closing'?'reader-closing':''}`} ref={dialogRef} role="dialog" tabIndex={-1} aria-modal="true" aria-label={modal==='write'?'Write a letter':modal==='read'?'Read a letter':"Letters you've released"}>
         {modal==='write'&&<form className="writing-paper" onSubmit={submitLetter}>
-          <div className="paper-topline">A note to the sea</div>
           <p className="handwritten greeting">Dear stranger,</p>
           <textarea autoFocus className="handwritten letter-writing" placeholder="I've been meaning to say..." aria-label="Write your message" maxLength={MAX_MESSAGE_LENGTH} value={message} onChange={e=>setMessage(e.target.value)} disabled={sealing||busy} />
           <div className="paper-signature"><span className="handwritten">Yours,</span><input className="handwritten" placeholder="a stranger" aria-label="Your name (optional)" value={author} onChange={e=>setAuthor(e.target.value)} maxLength={32} disabled={sealing||busy||Boolean(editing)}/></div>
           {error&&<p className="form-error" role="alert">{error}</p>}
-          <div className="paper-bottomline"><button className="quiet-link" type="button" onClick={openMine} disabled={sealing}>My letters</button><span>{message.length}/{MAX_MESSAGE_LENGTH}</span></div>
-          <button className="cast-button" type="submit" disabled={busy||sealing}>{editing?'Save this letter':'Seal the letter'}</button>
+          <div className="writing-actions">
+            <button className="seal-letter handwritten" type="submit" disabled={busy||sealing}>{editing?'Save this letter':'Seal the letter'}</button>
+          </div>
         </form>}
         {modal==='read'&&selected&&<article className="reading-paper">
-          <div className="paper-topline">A letter from somewhere</div>
           <p className="handwritten greeting">To whoever finds this,</p>
           <blockquote className="handwritten found-message">{selected.message}</blockquote>
           <p className="handwritten found-signature">Yours,<br/>{selected.author_name||'A stranger'}</p>
-          <div className="paper-bottomline"><span>{dateLabel(selected.created_at)}</span><div className="paper-links">{cloud&&!selected.id.startsWith('sample-')&&<button className="quiet-link" onClick={reportLetter} disabled={busy}>Report</button>}<button className="quiet-link" onClick={closeRead}>Return to the sea</button></div></div>
-          {error&&<p className="form-error" role="alert">{error}</p>}
         </article>}
         {modal==='mine'&&<section className="mine-content">
-          <div className="paper-topline">Your letters</div>
           <h2 className="handwritten greeting">Letters you've released</h2>
           {busy&&<p>Looking for your letters...</p>}
           {error&&<p className="form-error" role="alert">{error}</p>}
           {!busy&&own.length===0&&<p className="empty-note">The sea is waiting for your first letter.</p>}
           <div className="mine-list">{own.map(b=><article className="mine-letter" key={b.id}>
-            <p className="handwritten">{b.message}</p>
-            <div><span>{dateLabel(b.created_at)}</span><button onClick={()=>editLetter(b)}>Edit</button><button onClick={()=>removeLetter(b)} disabled={busy}>Remove</button></div>
+            <div className="mine-letter-copy">
+              <p className="handwritten">{b.message}</p>
+              <span className="mine-letter-date">{dateLabel(b.created_at)}</span>
+            </div>
+            <div className="mine-letter-actions">
+              <button type="button" onClick={()=>editLetter(b)} aria-label="Edit letter" title="Edit letter"><EditLetterIcon/></button>
+              <button type="button" onClick={()=>removeLetter(b)} disabled={busy} aria-label="Delete letter" title="Delete letter"><DeleteLetterIcon/></button>
+            </div>
           </article>)}</div>
-          <button className="cast-button" onClick={compose} type="button">Write another</button>
         </section>}
       </div>
       {sealing&&<div className="sealing-visual" aria-live="polite" aria-label="Rolling the paper and sealing it inside a bottle"><span className="rolling-sheet"/><AnimatedBottle/><span className="sealing-caption">Sealing your words…</span></div>}

@@ -2,7 +2,7 @@
 
 ## A visitor arrives
 
-`OceanScene.jsx` loads `lib/ocean.js` only on the client, because Three.js needs WebGL and the browser DOM. `initOcean()` creates a perspective camera, animated water geometry with GLSL shaders, a sky dome, lights, and glass-bottle meshes. Its camera starts at `(0,72,14)` and eases toward `(0,4.1,12.5)` over 6.2 seconds, following a slight arc while turning toward the horizon.
+`OceanScene.jsx` loads `lib/ocean.js` only on the client, because Three.js needs WebGL and the browser DOM. `initOcean()` creates a perspective camera, animated water geometry with GLSL shaders, a sky dome, procedural flat-shaded cloud meshes, lights, and glass-bottle meshes. Its camera starts at `(0,72,14)` and eases toward `(0,4.1,12.5)` over 6.2 seconds, following a slight arc while turning toward the horizon. Visitors drag to look and use WASD to move; arrow keys adjust the view. Touch screens add a four-way movement pad.
 
 ## A visitor writes
 
@@ -18,7 +18,7 @@ The Three.js raycaster detects clicks on enlarged invisible hit meshes, not on t
 
 ## Drift algorithm
 
-Each record stores `start_x`, `start_z`, `drift_seed` and `created_at`. On every frame, the client calculates movement from the letter's age and several low-frequency sine currents, then applies the current water height as buoyancy. The calculation is deterministic from stored fields and current time, so visitors can see consistent approximate motion without writing location updates to the database.
+Each record stores `start_x`, `start_z`, `drift_seed` and `created_at`. The client combines several smooth, seeded current waves, then applies the current water height as buoyancy. The path is deterministic from stored fields and current time, so visitors can see consistent approximate motion without writing location updates to the database. Camera travel, placement validation, and bottle drift all use the coordinate range already accepted by the Supabase schema (`start_x` -30 to 30; `start_z` -100 to 20). Reduced-motion mode holds bottles at their release points.
 
 ## Data lifecycle
 
@@ -29,8 +29,8 @@ Each record stores `start_x`, `start_z`, `drift_seed` and `created_at`. On every
 - DELETE `/api/bottles/[id]` removes the author's bottle.
 - POST `/api/bottles/[id]/report` reports harmful messages for review.
 
-Demo mode stores letters in the visitor's local browser only. Supabase authentication and database settings are needed before messages are shared across devices. The user can find edit/delete controls within the writing sheet's **My letters** link; they are deliberately not part of the ocean's permanent screen interface.
+Demo mode stores letters in the visitor's local browser only. Supabase authentication and database settings are needed before messages are shared across devices. The bottle icon in the bottom-left opens personal letter edit/delete controls; they remain outside the writing sheet and ocean scene.
 
 ## Verification limits
 
-Logic tests and JSX parsing were checked in the development environment. A complete Next.js build and visual WebGL interaction still require running the project locally with npm dependencies installed.
+Logic tests cover drift bounds, validation, solar positioning, and bottle release motion. Run `npm run check:logic` and `npm run build` to verify the app. A WebGL-capable browser is needed to inspect the rendered scene and controls.

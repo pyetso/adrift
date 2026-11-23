@@ -18,16 +18,16 @@ test('edit changes message only',()=>{
 test('new bottle positions stay inside ocean range',()=>{
   for(let i=0;i<500;i++){
     const pos=positionForNewBottle();
-    assert.ok(pos.start_x>=-9 && pos.start_x<=9);
-    assert.ok(pos.start_z<=-5 && pos.start_z>=-25);
+    assert.ok(pos.start_x>=-30 && pos.start_x<=30);
+    assert.ok(pos.start_z<=20 && pos.start_z>=-100);
     assert.ok(pos.drift_seed>0);
   }
 });
 test('a bottle can be placed where the visitor clicked, with safe coordinates',()=>{
-  const p=positionForNewBottle({start_x:4.65,start_z:-12.4});
-  assert.equal(p.start_x,4.65);
-  assert.equal(p.start_z,-12.4);
+  const p=positionForNewBottle({start_x:24.65,start_z:-82.4});
+  assert.equal(p.start_x,24.65);
+  assert.equal(p.start_z,-82.4);
   const outside=positionForNewBottle({start_x:999,start_z:-999});
-  assert.equal(outside.start_x,17);
-  assert.equal(outside.start_z,-30);
+  assert.equal(outside.start_x,30);
+  assert.equal(outside.start_z,-100);
 });
